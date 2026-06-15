@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account Control</title>
+<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+[data-theme="dark"] {
+    --bg:           #0a0e17;
+    --bg2:          #0e131d;
+    --surface:      #121826;
+    --surface2:     #161d2d;
+    --surface3:     #1c2435;
+    --row-hover:    rgba(56,130,246,0.05);
+    --border:       rgba(255,255,255,0.05);
+    --border-strong:rgba(255,255,255,0.10);
+    --text:         #e8edf5;
+    --text2:        rgba(232,237,245,0.55);
+    --text3:        rgba(232,237,245,0.30);
+    --blue:         #3b82f6;
+    --blue-soft:    rgba(59,130,246,0.12);
+    --green:        #22c55e;
+    --amber:        #f59e0b;
+    --red:          #ef4444;
+    --purple:       #8b5cf6;
+    --cyan:         #38bdf8;
+    --teal:         #2dd4bf;
+    --shadow:       0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-lg:    0 8px 28px rgba(0,0,0,0.5);
+    --blur-bg:      rgba(10,14,23,0.8);
+    --mono-bg:      rgba(0,0,0,0.3);
+}
+
+[data-theme="light"] {
+    --bg:           #f4f6fa;
+    --bg2:          #ffffff;
+    --surface:      #ffffff;
+    --surface2:     #f4f6fa;
+    --surface3:     #e9edf3;
+    --row-hover:    rgba(59,130,246,0.04);
+    --border:       rgba(15,23,42,0.07);
+    --border-strong:rgba(15,23,42,0.13);
+    --text:         #0f172a;
+    --text2:        rgba(15,23,42,0.55);
+    --text3:        rgba(15,23,42,0.30);
+    --blue:         #2563eb;
+    --blue-soft:    rgba(37,99,235,0.10);
+    --green:        #16a34a;
+    --amber:        #d97706;
+    --red:          #dc2626;
+    --purple:       #7c3aed;
+    --cyan:         #0891b2;
+    --teal:         #0d9488;
+    --shadow:       0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg:    0 8px 28px rgba(0,0,0,0.10);
+    --blur-bg:      rgba(255,255,255,0.85);
+    --mono-bg:      rgba(0,0,0,0.04);
+}
+
+html { -webkit-font-smoothing: antialiased; }
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "SF Pro Display", "SF Pro Text", BlinkMacSystemFont, sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+    transition: background 0.35s ease, color 0.35s ease;
+}
+
+/* ── NAVBAR ── */
+nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--blur-bg);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.35s;
+}
+
+.nav-left { display: flex; align-items: center; gap: 16px; }
+.nav-logo { font-size: 17px; font-weight: 600; letter-spacing: -0.4px; }
+.nav-right { display: flex; align-items: center; gap: 10px; }
+
+.live-chip {
+    display: flex; align-items: center; gap: 5px;
+    background: rgba(34,197,94,0.12);
+    border: 1px solid rgba(34,197,94,0.2);
+    border-radius: 6px; padding: 3px 9px 3px 7px;
+    font-size: 11px; font-weight: 500; color: var(--green);
+}
+.live-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: live 2s ease-in-out infinite; }
+@keyframes live { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.theme-btn {
+    width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); cursor: pointer; font-size: 15px;
+    display: grid; place-items: center;
+    transition: background 0.2s, transform 0.15s; flex-shrink: 0;
+}
+.theme-btn:hover { background: var(--surface3); transform: scale(1.05); }
+.theme-btn:active { transform: scale(0.95); }
+
+/* ── PAGE ── */
+.page { max-width: 1280px; margin: 0 auto; padding: 32px 32px 64px; }
+
+.page-header { margin-bottom: 22px; }
+.page-title { font-size: 28px; font-weight: 700; letter-spacing: -0.6px; margin-bottom: 4px; }
+.page-sub { font-size: 13px; color: var(--text2); }
+
+/* ── TOOLBAR ── */
+.toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+}
+.seg-control {
+    display: flex; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 8px; padding: 3px; gap: 2px;
+}
+.seg-btn {
+    font-size: 12px; font-weight: 500; padding: 6px 15px; border: none;
+    background: transparent; color: var(--text2); border-radius: 6px;
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.seg-btn:hover { color: var(--text); }
+.seg-btn.active { background: var(--blue-soft); color: var(--blue); }
+.result-count {
+    font-size: 12px; font-weight: 600; color: var(--blue);
+    background: var(--blue-soft); border: 1px solid rgba(59,130,246,0.2);
+    padding: 4px 11px; border-radius: 6px;
+}
+
+/* ── DATA GRID ── */
+.grid-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+table { width: 100%; border-collapse: collapse; }
+
+thead th {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    color: var(--text2);
+    padding: 15px 18px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    position: sticky;
+    top: 52px;
+    z-index: 5;
+}
+
+tbody td {
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+tbody tr { transition: background 0.12s; }
+tbody tr:hover { background: var(--row-hover); }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr.offline { opacity: 0.5; }
+
+/* Column widths */
+.col-check { width: 60px; text-align: center; }
+.col-hairs { width: 130px; }
+.col-island { width: 170px; }
+.col-tp { width: auto; }
+
+/* Username cell */
+.cell-user { display: flex; align-items: center; gap: 10px; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.status-dot.on  { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.status-dot.off { background: var(--text3); }
+.user-name { font-weight: 600; letter-spacing: -0.1px; white-space: nowrap; }
+.user-sub { font-size: 11px; color: var(--text3); margin-top: 1px; white-space: nowrap; }
+
+/* Hairs badge */
+.hairs-badge {
+    display: inline-flex; align-items: center;
+    background: rgba(139,92,246,0.14);
+    color: var(--purple);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 4px 13px;
+    border-radius: 6px;
+}
+.hairs-badge.zero { background: var(--surface3); color: var(--text3); }
+
+/* Island */
+.island-cell { color: var(--text2); white-space: nowrap; }
+
+/* Checkbox */
+.check {
+    appearance: none; -webkit-appearance: none;
+    width: 20px; height: 20px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 5px;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.15s, border-color 0.15s;
+    vertical-align: middle;
+}
+.check:hover { border-color: var(--blue); }
+.check:checked { background: var(--blue); border-color: var(--blue); }
+.check:checked::after {
+    content: '';
+    position: absolute;
+    left: 6px; top: 2px;
+    width: 5px; height: 10px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Teleport string + copy */
+.tp-cell { display: flex; align-items: center; gap: 8px; }
+.tp-code {
+    flex: 1;
+    min-width: 0;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    color: var(--text2);
+    background: var(--mono-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.tp-code.empty { color: var(--text3); font-style: italic; }
+
+.copy-btn {
+    flex-shrink: 0;
+    border: 1px solid var(--border-strong);
+    background: var(--surface3);
+    color: var(--text2);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+.copy-btn:hover { background: var(--blue-soft); color: var(--blue); border-color: var(--blue); }
+.copy-btn:active { transform: scale(0.96); }
+.copy-btn.copied { background: rgba(34,197,94,0.15); color: var(--green); border-color: rgba(34,197,94,0.4); }
+.copy-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Hairs dropdown */
+.col-drop { width: 110px; text-align: right; }
+
+.drop-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--border-strong);
+    background: var(--surface3);
+    color: var(--text2);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 7px 13px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+.drop-btn:hover { background: var(--blue-soft); color: var(--blue); border-color: var(--blue); }
+.drop-btn.open { background: var(--blue-soft); color: var(--blue); border-color: var(--blue); }
+.drop-caret { font-size: 10px; transition: transform 0.2s; }
+.drop-btn.open .drop-caret { transform: rotate(180deg); }
+
+.drop-row td { padding: 0 18px 14px; border-bottom: 1px solid var(--border); }
+.drop-row:hover { background: transparent; }
+
+.drop-panel { animation: drop-in 0.18s ease both; }
+@keyframes drop-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.drop-list {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.drop-item {
+    display: flex;
+    gap: 14px;
+    font-size: 12px;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+}
+.drop-item:last-child { border-bottom: none; }
+.drop-breed { color: var(--text); font-weight: 500; flex: 1; min-width: 120px; }
+.drop-coat  { color: var(--cyan); }
+.drop-mane  { color: var(--purple); }
+
+.drop-empty {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-align: center;
+    color: var(--text3);
+    font-size: 12px;
+    padding: 18px;
+}
+
+/* Empty state */
+.empty { text-align: center; padding: 80px 20px; color: var(--text2); }
+.empty h2 { font-size: 20px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+.empty p { font-size: 14px; }
+
+@media (max-width: 760px) {
+    nav { padding: 0 16px; }
+    .page { padding: 20px 16px 48px; }
+    .col-island, .island-col-cell { display: none; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-left">
+        <span class="nav-logo">Account Control</span>
+        <div class="live-chip"><span class="live-dot"></span>Live</div>
+    </div>
+    <div class="nav-right">
+        <button class="theme-btn" id="themeBtn" title="Toggle theme">🌙</button>
+    </div>
+</nav>
+
+<div class="page">
+
+    <div class="page-header">
+        <div class="page-title">Accounts</div>
+        <div class="page-sub">Tick an account to enable trade mode — it travels to Mainland and trades its Island Unique Hair animals to you</div>
+    </div>
+
+    <div class="toolbar">
+        <span class="result-count" id="resultCount"></span>
+    </div>
+
+    <div class="grid-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-check">Trade</th>
+                    <th class="col-user">Username</th>
+                    <th class="col-hairs">Unique Hairs</th>
+                    <th class="col-island">Island</th>
+                    <th class="col-tp">Teleport</th>
+                    <th class="col-drop">Hairs</th>
+                </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+const OFFLINE = 30000;
+const PLACE_ID = 6989310863;
+let accounts = {};
+let openDropdown = null; // username whose hair dropdown is open
+
+// Theme
+const html = document.documentElement;
+const themeBtn = document.getElementById("themeBtn");
+const saved = localStorage.getItem("whi-theme") || "dark";
+html.setAttribute("data-theme", saved);
+themeBtn.textContent = saved === "dark" ? "☀️" : "🌙";
+themeBtn.addEventListener("click", () => {
+    const next = html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    html.setAttribute("data-theme", next);
+    themeBtn.textContent = next === "dark" ? "☀️" : "🌙";
+    localStorage.setItem("whi-theme", next);
+});
+
+function online(a) { return a.timestamp && (Date.now() - a.timestamp) < OFFLINE; }
+
+function hairList(acc) {
+    if (!acc.indicators) return [];
+    const list = acc.indicators["Island Unique Hair"];
+    return Array.isArray(list) ? list : [];
+}
+
+function uniqueHairCount(acc) {
+    return hairList(acc).length;
+}
+
+function toggleDropdown(username) {
+    openDropdown = (openDropdown === username) ? null : username;
+    render();
+}
+
+function teleportString(jobId) {
+    if (!jobId) return null;
+    return `cloneref(game:GetService("TeleportService")):TeleportToPlaceInstance(${PLACE_ID}, "${jobId}", cloneref(game:GetService("Players")).LocalPlayer)`;
+}
+
+async function setTrade(username, enabled) {
+    try {
+        await fetch(`/api/config/${encodeURIComponent(username)}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ trade: { enabled } })
+        });
+    } catch (e) {}
+}
+
+function copyTp(btn, jobId) {
+    const str = teleportString(jobId);
+    if (!str) return;
+    navigator.clipboard.writeText(str).then(() => {
+        const original = btn.textContent;
+        btn.textContent = "Copied";
+        btn.classList.add("copied");
+        setTimeout(() => { btn.textContent = original; btn.classList.remove("copied"); }, 1400);
+    }).catch(() => {});
+}
+
+function render() {
+    const tbody = document.getElementById("tbody");
+    const entries = Object.entries(accounts);
+    entries.sort((a, b) => a[0].localeCompare(b[0]));
+
+    // Only online accounts
+    const filtered = entries.filter(([name, a]) => online(a));
+
+    document.getElementById("resultCount").textContent = filtered.length + " account" + (filtered.length !== 1 ? "s" : "") + " online";
+
+    if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty"><h2>No accounts online</h2><p>Waiting for status reports…</p></div></td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(([name, acc]) => {
+        const hairs = uniqueHairCount(acc);
+        const hairs_arr = hairList(acc);
+        const tpStr = teleportString(acc.jobId);
+        const checked = acc.tradeEnabled ? "checked" : "";
+        const isOpen = openDropdown === name;
+
+        const dropdownPanel = isOpen ? `
+            <tr class="drop-row">
+                <td colspan="6">
+                    <div class="drop-panel">
+                        ${hairs_arr.length ? `
+                            <div class="drop-list">
+                                ${hairs_arr.map(a => `
+                                    <div class="drop-item">
+                                        <span class="drop-breed">${a.breed || "?"}</span>
+                                        <span class="drop-coat">${a.coat || "?"}</span>
+                                        <span class="drop-mane">${a.maneColor || "?"}</span>
+                                    </div>`).join("")}
+                            </div>` : `<div class="drop-empty">No Island Unique Hairs caught yet</div>`}
+                    </div>
+                </td>
+            </tr>` : "";
+
+        return `<tr>
+            <td class="col-check">
+                <input type="checkbox" class="check" ${checked}
+                    onchange="setTrade('${name}', this.checked)" title="Toggle trade mode">
+            </td>
+            <td>
+                <div class="cell-user">
+                    <span class="status-dot on"></span>
+                    <div>
+                        <div class="user-name">${name}</div>
+                        <div class="user-sub">${acc.status || "Running"}</div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <span class="hairs-badge ${hairs === 0 ? "zero" : ""}">${hairs}</span>
+            </td>
+            <td class="island-col-cell"><span class="island-cell">${acc.island || "—"}</span></td>
+            <td>
+                <div class="tp-cell">
+                    <span class="tp-code ${tpStr ? "" : "empty"}" title="${tpStr ? tpStr.replace(/"/g, "&quot;") : ""}">${tpStr || "No JobId reported"}</span>
+                    <button class="copy-btn" ${tpStr ? "" : "disabled"} onclick="copyTp(this, '${acc.jobId || ""}')">Copy</button>
+                </div>
+            </td>
+            <td class="col-drop">
+                <button class="drop-btn ${isOpen ? "open" : ""}" onclick="toggleDropdown('${name}')">
+                    Hairs <span class="drop-caret">▾</span>
+                </button>
+            </td>
+        </tr>${dropdownPanel}`;
+    }).join("");
+}
+
+async function poll() {
+    try {
+        const r = await fetch("/api/accounts");
+        if (r.ok) { accounts = await r.json(); render(); }
+    } catch(e) {}
+}
+
+poll();
+setInterval(poll, 3000);
+</script>
+</body>
+</html>
