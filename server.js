@@ -103,7 +103,10 @@ const server = http.createServer((req, res) => {
     if (req.method === "GET" && (req.url === "/" || req.url === "/index.html")) {
         fs.readFile(path.join(__dirname, "index.html"), (err, data) => {
             if (err) { res.writeHead(500); res.end("Error"); return; }
-            res.writeHead(200, { "Content-Type": "text/html" });
+            res.writeHead(200, {
+                "Content-Type": "text/html",
+                "Cache-Control": "no-store, no-cache, must-revalidate",
+            });
             res.end(data);
         });
         return;
