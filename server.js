@@ -13,7 +13,7 @@ const accountConfigs = {};
 
 // Global config shared by every account
 let globalConfig = {
-    targetPlayer: "iiPancakes85",
+    targetPlayer: "",
     keepIndicators: ["Island Unique Hair"],
 };
 
@@ -34,80 +34,11 @@ function getFullConfig(username) {
     };
 }
 
-// ── Auth config (set these as environment variables on your host) ──
-// PANEL_USER / PANEL_PASS  -> browser login for you (the dashboard + global config)
-// SCRIPT_TOKEN             -> secret the Lua scripts send so they can report in
-const PANEL_USER   = process.env.PANEL_USER   || "admin";
-const PANEL_PASS   = process.env.PANEL_PASS   || "changeme";
-const SCRIPT_TOKEN = process.env.SCRIPT_TOKEN || "change-this-token";
-
-// Constant-time-ish string compare
-function safeEqual(a, b) {
-    if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false;
-    let diff = 0;
-    for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-    return diff === 0;
-}
-
-// Does this request carry the browser Basic Auth credential?
-function hasPanelAuth(req) {
-    const header = req.headers["authorization"] || "";
-    if (!header.startsWith("Basic ")) return false;
-    let decoded = "";
-    try { decoded = Buffer.from(header.slice(6), "base64").toString("utf8"); } catch { return false; }
-    const i = decoded.indexOf(":");
-    if (i < 0) return false;
-    const user = decoded.slice(0, i);
-    const pass = decoded.slice(i + 1);
-    return safeEqual(user, PANEL_USER) && safeEqual(pass, PANEL_PASS);
-}
-
-// Does this request carry the script token? (header or ?token= query)
-function hasScriptToken(req) {
-    const headerTok = req.headers["x-script-token"];
-    if (headerTok && safeEqual(headerTok, SCRIPT_TOKEN)) return true;
-    const qIdx = req.url.indexOf("?token=");
-    if (qIdx >= 0) {
-        const tok = decodeURIComponent(req.url.slice(qIdx + 7));
-        if (safeEqual(tok, SCRIPT_TOKEN)) return true;
-    }
-    return false;
-}
-
 const server = http.createServer((req, res) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Script-Token");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     if (req.method === "OPTIONS") { res.writeHead(204); res.end(); return; }
-
-    // Strip the token query param so the rest of the router sees clean URLs
-    const tokenQ = req.url.indexOf("?token=");
-    const cleanUrl = tokenQ >= 0 ? req.url.slice(0, tokenQ) : req.url;
-
-    // Endpoints the Lua scripts use — allowed with a valid script token
-    const isScriptEndpoint =
-        (req.method === "POST" && cleanUrl === "/api/status") ||
-        (req.method === "GET"  && cleanUrl.startsWith("/api/config/")) ||
-        (req.method === "POST" && cleanUrl.startsWith("/api/config/"));
-
-    if (isScriptEndpoint) {
-        if (!hasScriptToken(req)) {
-            res.writeHead(401, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "invalid script token" }));
-            return;
-        }
-        req.url = cleanUrl; // hand clean url to the router below
-    } else {
-        // Everything else (page, dashboard API, global config) needs browser login
-        if (!hasPanelAuth(req)) {
-            res.writeHead(401, {
-                "WWW-Authenticate": 'Basic realm="Account Control", charset="UTF-8"',
-                "Content-Type": "text/plain",
-            });
-            res.end("Authentication required");
-            return;
-        }
-    }
 
     // POST /api/status — Lua script sends status updates
     if (req.method === "POST" && req.url === "/api/status") {
