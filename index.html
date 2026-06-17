@@ -160,9 +160,11 @@ tbody tr:last-child td { border-bottom: none; }
 tbody tr.offline { opacity: 0.5; }
 
 /* Column widths */
-.col-check { width: 60px; text-align: center; }
-.col-hairs { width: 130px; }
-.col-island { width: 170px; }
+.col-check  { width: 60px; text-align: center; }
+.col-user   { width: 240px; }
+.col-hairs  { width: 120px; }
+.col-island { width: 160px; }
+.col-tp     { width: auto; }
 
 /* Username cell */
 .cell-user { display: flex; align-items: center; gap: 10px; }
@@ -211,12 +213,10 @@ tbody tr.offline { opacity: 0.5; }
 }
 
 /* Teleport string + copy */
-.col-tp { width: 320px; }
 .tp-cell { display: flex; align-items: center; gap: 8px; }
 .tp-code {
     flex: 1;
     min-width: 0;
-    max-width: 220px;
     font-family: ui-monospace, "SF Mono", Menlo, monospace;
     font-size: 11px;
     color: var(--text2);
@@ -225,10 +225,14 @@ tbody tr.offline { opacity: 0.5; }
     border-radius: 6px;
     padding: 7px 11px;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
 }
-.tp-code.empty { color: var(--text3); font-style: italic; }
+.tp-code::-webkit-scrollbar { height: 5px; }
+.tp-code::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+.tp-code::-webkit-scrollbar-track { background: transparent; }
+.tp-code.empty { color: var(--text3); font-style: italic; overflow: hidden; }
 
 .copy-btn {
     flex-shrink: 0;
@@ -271,20 +275,13 @@ tbody tr.offline { opacity: 0.5; }
 .drop-caret { font-size: 10px; transition: transform 0.2s; }
 .drop-btn.open .drop-caret { transform: rotate(180deg); }
 
-.drop-row td { padding: 0 18px 14px; border-bottom: 1px solid var(--border); }
-.drop-row:hover { background: transparent; }
+.drop-row td { padding: 0; border-bottom: 1px solid var(--border); background: var(--bg2); }
+.drop-row:hover { background: var(--bg2); }
 
-.drop-panel { animation: drop-in 0.18s ease both; }
-@keyframes drop-in {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
+.drop-panel { }
 
 .drop-list {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
+    background: var(--bg2);
     max-height: 260px;
     overflow-y: auto;
 }
@@ -293,7 +290,7 @@ tbody tr.offline { opacity: 0.5; }
     display: flex;
     gap: 14px;
     font-size: 12px;
-    padding: 8px 14px;
+    padding: 9px 18px;
     border-bottom: 1px solid var(--border);
 }
 .drop-item:last-child { border-bottom: none; }
@@ -302,9 +299,7 @@ tbody tr.offline { opacity: 0.5; }
 .drop-mane  { color: var(--purple); }
 
 .drop-empty {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    background: var(--bg2);
     text-align: center;
     color: var(--text3);
     font-size: 12px;
@@ -329,7 +324,7 @@ tbody tr.offline { opacity: 0.5; }
     <div class="nav-left">
         <span class="nav-logo">Account Control</span>
         <div class="live-chip"><span class="live-dot"></span>Live</div>
-        <span style="font-size:10px;color:var(--text3);font-family:ui-monospace,monospace;">v4 · grid</span>
+        <span style="font-size:10px;color:var(--text3);font-family:ui-monospace,monospace;">v5 · grid</span>
     </div>
     <div class="nav-right">
         <button class="theme-btn" id="themeBtn" title="Toggle theme">🌙</button>
