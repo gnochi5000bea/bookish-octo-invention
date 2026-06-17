@@ -164,7 +164,6 @@ tbody tr.offline { opacity: 0.5; }
 .col-user   { width: 240px; }
 .col-hairs  { width: 120px; }
 .col-island { width: 160px; }
-.col-tp     { width: auto; }
 
 /* Username cell */
 .cell-user { display: flex; align-items: center; gap: 10px; }
@@ -213,10 +212,12 @@ tbody tr.offline { opacity: 0.5; }
 }
 
 /* Teleport string + copy */
+.col-tp { width: 300px; }
 .tp-cell { display: flex; align-items: center; gap: 8px; }
 .tp-code {
     flex: 1;
     min-width: 0;
+    max-width: 200px;
     font-family: ui-monospace, "SF Mono", Menlo, monospace;
     font-size: 11px;
     color: var(--text2);
@@ -324,7 +325,7 @@ tbody tr.offline { opacity: 0.5; }
     <div class="nav-left">
         <span class="nav-logo">Account Control</span>
         <div class="live-chip"><span class="live-dot"></span>Live</div>
-        <span style="font-size:10px;color:var(--text3);font-family:ui-monospace,monospace;">v5 · grid</span>
+        <span style="font-size:10px;color:var(--text3);font-family:ui-monospace,monospace;">v6 · grid</span>
     </div>
     <div class="nav-right">
         <button class="theme-btn" id="themeBtn" title="Toggle theme">🌙</button>
@@ -418,77 +419,161 @@ function copyTp(btn, jobId) {
     }).catch(() => {});
 }
 
+// Build the inner HTML for a single account's main row cells
+function rowCellsHTML(name, acc) {
+    const hairs = uniqueHairCount(acc);
+    const tpStr = teleportString(acc.jobId);
+    const checked = acc.tradeEnabled ? "checked" : "";
+    const isOpen = openDropdown === name;
+    return `
+        <td class="col-check">
+            <input type="checkbox" class="check" ${checked}
+                onchange="setTrade('${name}', this.checked)" title="Toggle trade mode">
+        </td>
+        <td>
+            <div class="cell-user">
+                <span class="status-dot on"></span>
+                <div>
+                    <div class="user-name">${name}</div>
+                    <div class="user-sub">${acc.status || "Running"}</div>
+                </div>
+            </div>
+        </td>
+        <td>
+            <span class="hairs-badge ${hairs === 0 ? "zero" : ""}">${hairs}</span>
+        </td>
+        <td class="island-col-cell"><span class="island-cell">${acc.island || "—"}</span></td>
+        <td>
+            <div class="tp-cell">
+                <span class="tp-code ${tpStr ? "" : "empty"}" title="${tpStr ? tpStr.replace(/"/g, "&quot;") : ""}">${tpStr || "No JobId reported"}</span>
+                <button class="copy-btn" ${tpStr ? "" : "disabled"} onclick="copyTp(this, '${acc.jobId || ""}')">Copy</button>
+            </div>
+        </td>
+        <td class="col-drop">
+            <button class="drop-btn ${isOpen ? "open" : ""}" onclick="toggleDropdown('${name}')">
+                Hairs <span class="drop-caret">▾</span>
+            </button>
+        </td>`;
+}
+
+// Build the inner HTML for an account's dropdown panel
+function dropCellsHTML(acc) {
+    const arr = hairList(acc);
+    const body = arr.length
+        ? `<div class="drop-list">${arr.map(a => `
+                <div class="drop-item">
+                    <span class="drop-breed">${a.breed || "?"}</span>
+                    <span class="drop-coat">${a.coat || "?"}</span>
+                    <span class="drop-mane">${a.maneColor || "?"}</span>
+                </div>`).join("")}</div>`
+        : `<div class="drop-empty">No Island Unique Hairs caught yet</div>`;
+    return `<td colspan="6"><div class="drop-panel">${body}</div></td>`;
+}
+
+// Signature of the data that affects a row's main cells (skip DOM update if unchanged)
+function rowSignature(name, acc) {
+    return [
+        name,
+        acc.tradeEnabled ? 1 : 0,
+        acc.status || "",
+        acc.island || "",
+        acc.jobId || "",
+        uniqueHairCount(acc),
+        openDropdown === name ? 1 : 0,
+    ].join("|");
+}
+
 function render() {
     const tbody = document.getElementById("tbody");
-    const entries = Object.entries(accounts);
-    entries.sort((a, b) => a[0].localeCompare(b[0]));
-
-    // Only online accounts
+    const entries = Object.entries(accounts).sort((a, b) => a[0].localeCompare(b[0]));
     const filtered = entries.filter(([name, a]) => online(a));
 
-    document.getElementById("resultCount").textContent = filtered.length + " account" + (filtered.length !== 1 ? "s" : "") + " online";
+    document.getElementById("resultCount").textContent =
+        filtered.length + " account" + (filtered.length !== 1 ? "s" : "") + " online";
 
+    // Empty state
     if (!filtered.length) {
-        tbody.innerHTML = `<tr><td colspan="6"><div class="empty"><h2>No accounts online</h2><p>Waiting for status reports…</p></div></td></tr>`;
+        tbody.innerHTML = `<tr class="empty-row"><td colspan="6"><div class="empty"><h2>No accounts online</h2><p>Waiting for status reports…</p></div></td></tr>`;
         return;
     }
+    const emptyRow = tbody.querySelector(".empty-row");
+    if (emptyRow) emptyRow.remove();
 
-    tbody.innerHTML = filtered.map(([name, acc]) => {
-        const hairs = uniqueHairCount(acc);
-        const hairs_arr = hairList(acc);
-        const tpStr = teleportString(acc.jobId);
-        const checked = acc.tradeEnabled ? "checked" : "";
-        const isOpen = openDropdown === name;
+    const seen = new Set();
 
-        const dropdownPanel = isOpen ? `
-            <tr class="drop-row">
-                <td colspan="6">
-                    <div class="drop-panel">
-                        ${hairs_arr.length ? `
-                            <div class="drop-list">
-                                ${hairs_arr.map(a => `
-                                    <div class="drop-item">
-                                        <span class="drop-breed">${a.breed || "?"}</span>
-                                        <span class="drop-coat">${a.coat || "?"}</span>
-                                        <span class="drop-mane">${a.maneColor || "?"}</span>
-                                    </div>`).join("")}
-                            </div>` : `<div class="drop-empty">No Island Unique Hairs caught yet</div>`}
-                    </div>
-                </td>
-            </tr>` : "";
+    filtered.forEach(([name, acc]) => {
+        seen.add(name);
+        let mainRow = tbody.querySelector(`tr.acc-row[data-name="${CSS.escape(name)}"]`);
+        let dropRow = tbody.querySelector(`tr.drop-row[data-name="${CSS.escape(name)}"]`);
 
-        return `<tr>
-            <td class="col-check">
-                <input type="checkbox" class="check" ${checked}
-                    onchange="setTrade('${name}', this.checked)" title="Toggle trade mode">
-            </td>
-            <td>
-                <div class="cell-user">
-                    <span class="status-dot on"></span>
-                    <div>
-                        <div class="user-name">${name}</div>
-                        <div class="user-sub">${acc.status || "Running"}</div>
-                    </div>
-                </div>
-            </td>
-            <td>
-                <span class="hairs-badge ${hairs === 0 ? "zero" : ""}">${hairs}</span>
-            </td>
-            <td class="island-col-cell"><span class="island-cell">${acc.island || "—"}</span></td>
-            <td>
-                <div class="tp-cell">
-                    <span class="tp-code ${tpStr ? "" : "empty"}" title="${tpStr ? tpStr.replace(/"/g, "&quot;") : ""}">${tpStr || "No JobId reported"}</span>
-                    <button class="copy-btn" ${tpStr ? "" : "disabled"} onclick="copyTp(this, '${acc.jobId || ""}')">Copy</button>
-                </div>
-            </td>
-            <td class="col-drop">
-                <button class="drop-btn ${isOpen ? "open" : ""}" onclick="toggleDropdown('${name}')">
-                    Hairs <span class="drop-caret">▾</span>
-                </button>
-            </td>
-        </tr>${dropdownPanel}`;
-    }).join("");
+        // Create main row if missing
+        if (!mainRow) {
+            mainRow = document.createElement("tr");
+            mainRow.className = "acc-row";
+            mainRow.dataset.name = name;
+            mainRow.innerHTML = rowCellsHTML(name, acc);
+            mainRow.dataset.sig = rowSignature(name, acc);
+            tbody.appendChild(mainRow);
+        } else {
+            // Only re-render the cells if data changed
+            const sig = rowSignature(name, acc);
+            if (mainRow.dataset.sig !== sig) {
+                mainRow.innerHTML = rowCellsHTML(name, acc);
+                mainRow.dataset.sig = sig;
+            }
+        }
+
+        const shouldShowDrop = openDropdown === name;
+
+        // Manage dropdown row
+        if (shouldShowDrop) {
+            const dropSig = "open|" + uniqueHairCount(acc);
+            if (!dropRow) {
+                dropRow = document.createElement("tr");
+                dropRow.className = "drop-row";
+                dropRow.dataset.name = name;
+                dropRow.innerHTML = dropCellsHTML(acc);
+                dropRow.dataset.sig = dropSig;
+                mainRow.after(dropRow);
+            } else if (dropRow.dataset.sig !== dropSig) {
+                // Only rebuild dropdown contents when the hair data changed
+                dropRow.innerHTML = dropCellsHTML(acc);
+                dropRow.dataset.sig = dropSig;
+            }
+        } else if (dropRow) {
+            dropRow.remove();
+        }
+    });
+
+    // Remove rows for accounts no longer present/online
+    tbody.querySelectorAll("tr.acc-row").forEach(tr => {
+        if (!seen.has(tr.dataset.name)) {
+            const dr = tbody.querySelector(`tr.drop-row[data-name="${CSS.escape(tr.dataset.name)}"]`);
+            if (dr) dr.remove();
+            tr.remove();
+        }
+    });
+
+    // Keep rows in sorted order (move any out-of-place rows)
+    let cursor = null;
+    filtered.forEach(([name]) => {
+        const mainRow = tbody.querySelector(`tr.acc-row[data-name="${CSS.escape(name)}"]`);
+        const dropRow = tbody.querySelector(`tr.drop-row[data-name="${CSS.escape(name)}"]`);
+        if (cursor === null) {
+            if (tbody.firstChild !== mainRow) tbody.insertBefore(mainRow, tbody.firstChild);
+        } else {
+            if (cursor.nextSibling !== mainRow) tbody.insertBefore(mainRow, cursor.nextSibling);
+        }
+        cursor = mainRow;
+        if (dropRow) {
+            if (cursor.nextSibling !== dropRow) tbody.insertBefore(dropRow, cursor.nextSibling);
+            cursor = dropRow;
+        }
+    });
 }
+
+// Re-render just toggles a dropdown without rebuilding the table
+function applyDropdownToggle() { render(); }
 
 async function poll() {
     try {
