@@ -124,6 +124,112 @@ nav {
 .page-sub { font-size: 13px; color: var(--text2); }
 .page-count { font-size: 12px; color: var(--text3); margin-top: 8px; font-weight: 500; }
 
+/* ── GLOBAL CONFIG PANEL ── */
+.config-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 18px 20px;
+    margin-bottom: 20px;
+}
+.config-row { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
+.config-field { display: flex; flex-direction: column; gap: 6px; min-width: 200px; }
+.config-field.grow { flex: 1; }
+.config-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.4px;
+    text-transform: uppercase; color: var(--text3);
+}
+.config-input {
+    background: var(--surface2);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-family: inherit; font-size: 14px; color: var(--text);
+    transition: border-color 0.15s;
+}
+.config-input:focus { outline: none; border-color: var(--blue); }
+.config-save {
+    background: var(--blue); color: #fff; border: none;
+    border-radius: 8px; padding: 9px 20px;
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: filter 0.15s, transform 0.1s;
+}
+.config-save:hover { filter: brightness(1.1); }
+.config-save:active { transform: scale(0.97); }
+.config-save.saved { background: var(--green); }
+
+/* multi-select */
+.ms-wrap { position: relative; }
+.ms-toggle {
+    width: 100%;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-family: inherit; font-size: 14px; color: var(--text);
+    cursor: pointer; transition: border-color 0.15s;
+}
+.ms-toggle:hover { border-color: var(--blue); }
+.ms-summary { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text2); }
+.ms-summary.has-sel { color: var(--text); }
+
+.ms-menu {
+    display: none;
+    position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+    background: var(--bg2);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    box-shadow: var(--shadow-lg);
+    z-index: 50;
+    overflow: hidden;
+}
+.ms-menu.open { display: block; }
+.ms-search {
+    width: 100%;
+    background: var(--surface2);
+    border: none; border-bottom: 1px solid var(--border);
+    padding: 10px 12px;
+    font-family: inherit; font-size: 13px; color: var(--text);
+}
+.ms-search:focus { outline: none; }
+.ms-options { max-height: 280px; overflow-y: auto; }
+.ms-option {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px;
+    font-size: 13px; cursor: pointer;
+    transition: background 0.1s;
+}
+.ms-option:hover { background: var(--row-hover); }
+.ms-option .box {
+    width: 17px; height: 17px; border-radius: 5px;
+    border: 1.5px solid var(--border-strong);
+    flex-shrink: 0; position: relative; transition: all 0.12s;
+}
+.ms-option.sel .box { background: var(--blue); border-color: var(--blue); }
+.ms-option.sel .box::after {
+    content: ''; position: absolute; left: 5px; top: 1px;
+    width: 4px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+.ms-empty { padding: 14px; text-align: center; color: var(--text3); font-size: 12px; }
+
+.ms-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.ms-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--blue-soft); color: var(--blue);
+    border: 1px solid rgba(59,130,246,0.25);
+    border-radius: 6px; padding: 3px 6px 3px 10px;
+    font-size: 12px; font-weight: 500;
+}
+.ms-chip button {
+    border: none; background: transparent; color: var(--blue);
+    cursor: pointer; font-size: 13px; line-height: 1; padding: 0 2px;
+    opacity: 0.7;
+}
+.ms-chip button:hover { opacity: 1; }
+
 /* ── DATA GRID ── */
 .grid-wrap {
     background: var(--surface);
@@ -296,6 +402,7 @@ tbody tr.offline { opacity: 0.5; }
 }
 .drop-item:last-child { border-bottom: none; }
 .drop-breed { color: var(--text); font-weight: 500; flex: 1; min-width: 120px; }
+.drop-ind   { color: var(--amber); font-size: 11px; }
 .drop-coat  { color: var(--cyan); }
 .drop-mane  { color: var(--purple); }
 
@@ -325,7 +432,7 @@ tbody tr.offline { opacity: 0.5; }
     <div class="nav-left">
         <span class="nav-logo">Account Control</span>
         <div class="live-chip"><span class="live-dot"></span>Live</div>
-        <span style="font-size:10px;color:var(--text3);font-family:ui-monospace,monospace;">v6 · grid</span>
+        <span style="font-size:10px;color:var(--text3);font-family:ui-monospace,monospace;">v7 · grid</span>
     </div>
     <div class="nav-right">
         <button class="theme-btn" id="themeBtn" title="Toggle theme">🌙</button>
@@ -336,8 +443,32 @@ tbody tr.offline { opacity: 0.5; }
 
     <div class="page-header">
         <div class="page-title">Accounts</div>
-        <div class="page-sub">Tick an account to enable trade mode — it travels to Mainland and trades its Island Unique Hair animals to you</div>
+        <div class="page-sub">Tick an account to enable trade mode — it travels to Mainland and trades the matching animals to your target player</div>
         <div class="page-count" id="resultCount"></div>
+    </div>
+
+    <div class="config-panel">
+        <div class="config-row">
+            <div class="config-field">
+                <label class="config-label">Target Player</label>
+                <input type="text" class="config-input" id="targetPlayer" placeholder="Your username" autocomplete="off">
+            </div>
+            <div class="config-field grow">
+                <label class="config-label">Keep Indicators</label>
+                <div class="ms-wrap" id="msWrap">
+                    <button class="ms-toggle" id="msToggle" type="button">
+                        <span class="ms-summary" id="msSummary">Select indicators…</span>
+                        <span class="drop-caret">▾</span>
+                    </button>
+                    <div class="ms-menu" id="msMenu">
+                        <input type="text" class="ms-search" id="msSearch" placeholder="Search…" autocomplete="off">
+                        <div class="ms-options" id="msOptions"></div>
+                    </div>
+                </div>
+            </div>
+            <button class="config-save" id="configSave">Save</button>
+        </div>
+        <div class="ms-chips" id="msChips"></div>
     </div>
 
     <div class="grid-wrap">
@@ -346,10 +477,10 @@ tbody tr.offline { opacity: 0.5; }
                 <tr>
                     <th class="col-check">Trade</th>
                     <th class="col-user">Username</th>
-                    <th class="col-hairs">Unique Hairs</th>
+                    <th class="col-hairs">Animals</th>
                     <th class="col-island">Island</th>
                     <th class="col-tp">Teleport</th>
-                    <th class="col-drop">Hairs</th>
+                    <th class="col-drop">Animals</th>
                 </tr>
             </thead>
             <tbody id="tbody"></tbody>
@@ -376,12 +507,251 @@ themeBtn.addEventListener("click", () => {
     localStorage.setItem("whi-theme", next);
 });
 
+// ── Global config (target player + keep indicators) ──
+const INDICATOR_OPTIONS = [
+    "Akhal-Teke Horse",
+    "Andalusian Horse",
+    "Appaloosa Horse",
+    "Appaloosa Horse (v1)",
+    "Apple Basket Unique",
+    "Arabian Horse",
+    "Archaeological Find",
+    "Autumn '22 Unique",
+    "Autumn '23 Unique",
+    "Autumn '24 Unique",
+    "Autumn '25 Unique",
+    "Autumn '26 Unique",
+    "Autumn Limited",
+    "Ava's Unicorn",
+    "Breeding Unique Coat",
+    "Clydesdale Horse",
+    "Clydesdale Horse (v1)",
+    "Co-breeding Unique Coat",
+    "Code Unique",
+    "Collection Log Reward",
+    "Common Breed",
+    "Competition Unique",
+    "Connemara Pony",
+    "Dutch Warmblood Horse",
+    "Easter '22 Unique",
+    "Easter '23 Unique",
+    "Easter '24 Unique",
+    "Easter '25 Unique",
+    "Easter '26 Unique",
+    "Easter Limited",
+    "Epic Breed",
+    "Event Limited",
+    "Fjord Horse",
+    "Fly",
+    "Foal",
+    "Free Gift",
+    "Friesian Horse",
+    "Friesian Horse (v1)",
+    "Halloween '22 Unique",
+    "Halloween '23 Unique",
+    "Halloween '24 Unique",
+    "Halloween '25 Unique",
+    "Halloween '26 Unique",
+    "Halloween Limited",
+    "Hinny",
+    "Holiday '22 Unique",
+    "Holiday '23 Unique",
+    "Holiday '24 Unique",
+    "Holiday '25 Unique",
+    "Holiday '26 Unique",
+    "Holiday Limited",
+    "Horned",
+    "Hybrid Animal",
+    "Hybrid Unique Coat",
+    "Icelandic Horse",
+    "Isabel's Unicorn",
+    "Island Unique Coat",
+    "Island Unique Hair",
+    "Island Unique Horn",
+    "Layla's Unicorn",
+    "Legacy Breed",
+    "Legacy Coat",
+    "Legacy Item",
+    "Legendary Breed",
+    "Loyalty Reward Unique",
+    "Mammoth Donkey",
+    "Marwari Horse",
+    "Mismatched Hair",
+    "Morgan Horse",
+    "Ms. Primrose's Unicorn",
+    "Mule",
+    "Mustang Horse",
+    "Naturally Dyed",
+    "New Year's '22 Unique",
+    "New Year's '23 Unique",
+    "New Year's '24 Unique",
+    "New Year's '25 Unique",
+    "New Year's '26 Unique",
+    "New Year's Limited",
+    "Paint Horse",
+    "Paint Horse (v1)",
+    "Percheron Horse",
+    "Premium",
+    "Quarter Horse",
+    "Quarter Horse (v1)",
+    "Rare Accessory",
+    "Rare Breed",
+    "Rare Coat",
+    "Reindeer",
+    "Rescue Animal",
+    "Rescue Unique",
+    "Rory's Unicorn",
+    "Secret Item",
+    "Shire Horse",
+    "Sophia's Unicorn",
+    "Special Coat",
+    "Special Hair",
+    "Special Island Unique Coat",
+    "Spring '22 Unique",
+    "Spring '23 Unique",
+    "Spring '24 Unique",
+    "Spring '25 Unique",
+    "Spring '26 Unique",
+    "Spring Limited",
+    "St. Patrick's '22 Unique",
+    "St. Patrick's '23 Unique",
+    "St. Patrick's '24 Unique",
+    "St. Patrick's '25 Unique",
+    "St. Patrick's '26 Unique",
+    "St. Patrick's Limited",
+    "Standard Donkey",
+    "Standardbred Horse",
+    "Summer '22 Unique",
+    "Summer '23 Unique",
+    "Summer '24 Unique",
+    "Summer '25 Unique",
+    "Summer '26 Unique",
+    "Summer Limited",
+    "Thoroughbred Horse",
+    "Training Unique",
+    "Treasure Unique",
+    "Unbreedable",
+    "Uncommon Breed",
+    "Unicorn Academy Event",
+    "Untradeable",
+    "Valentina's Unicorn",
+    "Valentine's '22 Unique",
+    "Valentine's '23 Unique",
+    "Valentine's '24 Unique",
+    "Valentine's '25 Unique",
+    "Valentine's '26 Unique",
+    "Valentine's Limited",
+    "Very Rare Breed",
+    "Volcanic Minerals Unique",
+    "Winter '22 Unique",
+    "Winter '23 Unique",
+    "Winter '24 Unique",
+    "Winter '25 Unique",
+    "Winter '26 Unique",
+    "Winter Limited"
+];
+let selectedIndicators = new Set(["Island Unique Hair"]);
+let msSearchTerm = "";
+
+const msToggle = document.getElementById("msToggle");
+const msMenu = document.getElementById("msMenu");
+const msOptions = document.getElementById("msOptions");
+const msSummary = document.getElementById("msSummary");
+const msChips = document.getElementById("msChips");
+const msSearch = document.getElementById("msSearch");
+const targetPlayerInput = document.getElementById("targetPlayer");
+const configSave = document.getElementById("configSave");
+
+msToggle.addEventListener("click", () => {
+    msMenu.classList.toggle("open");
+    if (msMenu.classList.contains("open")) { msSearch.value = ""; msSearchTerm = ""; renderMsOptions(); msSearch.focus(); }
+});
+document.addEventListener("click", (e) => {
+    if (!document.getElementById("msWrap").contains(e.target)) msMenu.classList.remove("open");
+});
+msSearch.addEventListener("input", () => { msSearchTerm = msSearch.value.toLowerCase(); renderMsOptions(); });
+
+function renderMsOptions() {
+    const term = msSearchTerm;
+    const list = INDICATOR_OPTIONS.filter(o => o.toLowerCase().includes(term));
+    if (!list.length) { msOptions.innerHTML = `<div class="ms-empty">No matches</div>`; return; }
+    msOptions.innerHTML = list.map(o => {
+        const sel = selectedIndicators.has(o) ? "sel" : "";
+        const safe = o.replace(/"/g, "&quot;");
+        return `<div class="ms-option ${sel}" data-val="${safe}"><span class="box"></span><span>${o}</span></div>`;
+    }).join("");
+    msOptions.querySelectorAll(".ms-option").forEach(el => {
+        el.addEventListener("click", () => {
+            const v = el.getAttribute("data-val");
+            if (selectedIndicators.has(v)) selectedIndicators.delete(v);
+            else selectedIndicators.add(v);
+            renderMsOptions(); renderMsSummary();
+        });
+    });
+}
+
+function renderMsSummary() {
+    const n = selectedIndicators.size;
+    msSummary.textContent = n === 0 ? "Select indicators…" : n + " selected";
+    msSummary.classList.toggle("has-sel", n > 0);
+    const sorted = [...selectedIndicators].sort((a,b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    msChips.innerHTML = sorted.map(v => {
+        const safe = v.replace(/"/g, "&quot;");
+        return `<span class="ms-chip">${v}<button data-val="${safe}" title="Remove">✕</button></span>`;
+    }).join("");
+    msChips.querySelectorAll("button").forEach(b => {
+        b.addEventListener("click", () => {
+            selectedIndicators.delete(b.getAttribute("data-val"));
+            renderMsSummary();
+            if (msMenu.classList.contains("open")) renderMsOptions();
+        });
+    });
+}
+
+async function loadGlobalConfig() {
+    try {
+        const r = await fetch("/api/global");
+        if (r.ok) {
+            const cfg = await r.json();
+            targetPlayerInput.value = cfg.targetPlayer || "";
+            selectedIndicators = new Set(Array.isArray(cfg.keepIndicators) ? cfg.keepIndicators : []);
+            renderMsSummary();
+        }
+    } catch (e) {}
+}
+
+configSave.addEventListener("click", async () => {
+    const payload = {
+        targetPlayer: targetPlayerInput.value.trim(),
+        keepIndicators: [...selectedIndicators],
+    };
+    try {
+        await fetch("/api/global", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+        const orig = configSave.textContent;
+        configSave.textContent = "Saved";
+        configSave.classList.add("saved");
+        setTimeout(() => { configSave.textContent = orig; configSave.classList.remove("saved"); }, 1400);
+    } catch (e) {}
+});
+
+loadGlobalConfig();
+
 function online(a) { return a.timestamp && (Date.now() - a.timestamp) < OFFLINE; }
 
 function hairList(acc) {
     if (!acc.indicators) return [];
-    const list = acc.indicators["Island Unique Hair"];
-    return Array.isArray(list) ? list : [];
+    const out = [];
+    for (const indName of Object.keys(acc.indicators)) {
+        const arr = acc.indicators[indName];
+        if (Array.isArray(arr)) {
+            arr.forEach(a => out.push({ ...a, indicator: indName }));
+        }
+    }
+    return out;
 }
 
 function uniqueHairCount(acc) {
@@ -451,7 +821,7 @@ function rowCellsHTML(name, acc) {
         </td>
         <td class="col-drop">
             <button class="drop-btn ${isOpen ? "open" : ""}" onclick="toggleDropdown('${name}')">
-                Hairs <span class="drop-caret">▾</span>
+                <span class="drop-caret">▾</span>
             </button>
         </td>`;
 }
@@ -463,10 +833,11 @@ function dropCellsHTML(acc) {
         ? `<div class="drop-list">${arr.map(a => `
                 <div class="drop-item">
                     <span class="drop-breed">${a.breed || "?"}</span>
+                    <span class="drop-ind">${a.indicator || "?"}</span>
                     <span class="drop-coat">${a.coat || "?"}</span>
                     <span class="drop-mane">${a.maneColor || "?"}</span>
                 </div>`).join("")}</div>`
-        : `<div class="drop-empty">No Island Unique Hairs caught yet</div>`;
+        : `<div class="drop-empty">No matching animals yet</div>`;
     return `<td colspan="6"><div class="drop-panel">${body}</div></td>`;
 }
 
