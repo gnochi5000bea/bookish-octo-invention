@@ -163,7 +163,6 @@ tbody tr.offline { opacity: 0.5; }
 .col-check { width: 60px; text-align: center; }
 .col-hairs { width: 130px; }
 .col-island { width: 170px; }
-.col-tp { width: auto; }
 
 /* Username cell */
 .cell-user { display: flex; align-items: center; gap: 10px; }
@@ -212,10 +211,12 @@ tbody tr.offline { opacity: 0.5; }
 }
 
 /* Teleport string + copy */
+.col-tp { width: 320px; }
 .tp-cell { display: flex; align-items: center; gap: 8px; }
 .tp-code {
     flex: 1;
     min-width: 0;
+    max-width: 220px;
     font-family: ui-monospace, "SF Mono", Menlo, monospace;
     font-size: 11px;
     color: var(--text2);
@@ -328,7 +329,7 @@ tbody tr.offline { opacity: 0.5; }
     <div class="nav-left">
         <span class="nav-logo">Account Control</span>
         <div class="live-chip"><span class="live-dot"></span>Live</div>
-        <span style="font-size:10px;color:var(--text3);font-family:ui-monospace,monospace;">v3 · grid</span>
+        <span style="font-size:10px;color:var(--text3);font-family:ui-monospace,monospace;">v4 · grid</span>
     </div>
     <div class="nav-right">
         <button class="theme-btn" id="themeBtn" title="Toggle theme">🌙</button>
